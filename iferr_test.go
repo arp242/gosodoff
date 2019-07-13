@@ -35,8 +35,8 @@ func iferrOK(t *testing.T, fn string, off int, exp string) {
 	const (
 		fnPre   = "package main\nfunc foo() "
 		fnPost  = " {}"
-		actPre  = "if err != nil {\n\treturn "
-		actPost = "\n}\n"
+		actPre  = "return "
+		actPost = "\n"
 	)
 
 	act, err := iferrStr(fnPre+fn, len(fnPre)+1+off)

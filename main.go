@@ -18,17 +18,17 @@ const noname = "(no name)"
 var dbgLog *log.Logger
 
 var isNum = map[string]struct{}{
-	"int":     struct{}{},
-	"int16":   struct{}{},
-	"int32":   struct{}{},
-	"int64":   struct{}{},
-	"uint":    struct{}{},
-	"uint16":  struct{}{},
-	"uint32":  struct{}{},
-	"uint64":  struct{}{},
-	"float":   struct{}{},
-	"float32": struct{}{},
-	"float64": struct{}{},
+	"int":     {},
+	"int16":   {},
+	"int32":   {},
+	"int64":   {},
+	"uint":    {},
+	"uint16":  {},
+	"uint32":  {},
+	"uint64":  {},
+	"float":   {},
+	"float32": {},
+	"float64": {},
 }
 
 func logd(s string, args ...interface{}) {
@@ -129,11 +129,11 @@ func typeString(x ast.Expr) string {
 
 func writeIferr(w io.Writer, types []ast.Expr) error {
 	if len(types) == 0 {
-		_, err := fmt.Fprint(w, "if err != nil {\n\treturn\n}\n")
+		_, err := fmt.Fprint(w, "return\n")
 		return err
 	}
 	bb := &bytes.Buffer{}
-	bb.WriteString("if err != nil {\n\treturn ")
+	bb.WriteString("return ")
 	for i, t := range types {
 		if i > 0 {
 			bb.WriteString(", ")
@@ -185,7 +185,7 @@ func writeIferr(w io.Writer, types []ast.Expr) error {
 		bb.WriteString(ts)
 		bb.WriteString("{}")
 	}
-	bb.WriteString("\n}\n")
+	bb.WriteString("\n")
 	io.Copy(w, bb)
 	return nil
 }
