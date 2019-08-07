@@ -1,18 +1,7 @@
-# `return` statement generator for Go
+`gosodoff` tells your control flow to sod off by generating a return statement.
 
-`goreturn` generates a `return` statement for a function with zero values.
+Mostly intended for tool integration, e.g. `;e` and `;r` in
+[gopher.vim](https://github.com/arp242/gopher.vim).
 
-## Installation
-
-```console
-$ go get -u github.com/110y/goreturn
-```
-
-## Usage
-
-This generates a return statementat for a function placed at 1000 bytes in `main.go`.
-
-```console
-$ goreturn -pos 1000 < main.go
-return nil
-```
+Unifies [goreturn](https://github.com/110y/goreturn) and
+[goiferr](https://github.com/koron/iferr).

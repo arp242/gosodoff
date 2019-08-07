@@ -127,13 +127,24 @@ func typeString(x ast.Expr) string {
 	return ""
 }
 
-func writeIferr(w io.Writer, types []ast.Expr) error {
+func write(w io.Writer, types []ast.Expr, errcheck bool) error {
 	if len(types) == 0 {
-		_, err := fmt.Fprint(w, "return\n")
+		var err error
+		if errcheck {
+			_, err = fmt.Fprint(w, "if err != nil {\n\treturn\n}\n")
+		} else {
+			_, err = fmt.Fprint(w, "return\n")
+		}
 		return err
 	}
+
 	bb := &bytes.Buffer{}
-	bb.WriteString("return ")
+	if errcheck {
+		bb.WriteString("if err != nil {\n\treturn ")
+	} else {
+		bb.WriteString("return ")
+	}
+
 	for i, t := range types {
 		if i > 0 {
 			bb.WriteString(", ")
@@ -185,14 +196,19 @@ func writeIferr(w io.Writer, types []ast.Expr) error {
 		bb.WriteString(ts)
 		bb.WriteString("{}")
 	}
-	bb.WriteString("\n")
+
+	if errcheck {
+		bb.WriteString("\n}\n")
+	} else {
+		bb.WriteString("\n")
+	}
 	io.Copy(w, bb)
 	return nil
 }
 
-func iferr(w io.Writer, r io.Reader, pos int) error {
+func gosodoff(w io.Writer, r io.Reader, pos int, errcheck bool) error {
 	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, "iferr.go", r, 0)
+	file, err := parser.ParseFile(fset, "gosodoff.go", r, 0)
 	if err != nil {
 		return err
 	}
@@ -205,21 +221,24 @@ func iferr(w io.Writer, r io.Reader, pos int) error {
 		return fmt.Errorf("no functions at %d", pos)
 	}
 	types := toTypes(v.ft.Results)
-	return writeIferr(w, types)
+	return write(w, types, errcheck)
 }
 
 func main() {
 	var (
-		pos   int
-		debug bool
+		pos      int
+		debug    bool
+		errcheck bool
 	)
 	flag.IntVar(&pos, "pos", 0, "position of cursor")
 	flag.BoolVar(&debug, "debug", false, "enable debug log")
+	flag.BoolVar(&errcheck, "errcheck", false, "add error check and return err")
 	flag.Parse()
 	if debug {
 		dbgLog = log.New(os.Stderr, "D ", 0)
 	}
-	err := iferr(os.Stdout, os.Stdin, pos)
+
+	err := gosodoff(os.Stdout, os.Stdin, pos, errcheck)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
