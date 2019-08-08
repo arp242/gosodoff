@@ -156,7 +156,11 @@ func write(w io.Writer, types []ast.Expr, errcheck bool) error {
 			continue
 		}
 		if ts == "error" {
-			bb.WriteString("nil")
+			if errcheck {
+				bb.WriteString("err")
+			} else {
+				bb.WriteString("nil")
+			}
 			continue
 		}
 		if ts == "string" {
